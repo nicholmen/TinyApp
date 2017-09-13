@@ -1,0 +1,28 @@
+<!-- instructions Using EJS and HTML, code your urls_index.ejs file to display the following:
+A list or table of the URLs and their shortened forms.
+A link for shortening a new URL (this will be a dead link for now, that is it doesn't need to go anywhere since you'll be building its functionality later). -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>TinyApp</title>
+</head>
+<body>
+
+    <%- include partials/_header %>
+
+    <!-- Add your EJS code here -->
+  <ul>
+
+    <% for (var shortCode in urls) { %>
+      <li>
+        <%= urls[shortCode] %> -
+        <%= shortCode %>
+      </li>
+    <% } %>
+    <!-- <li>"b2xVn2": "http://www.lighthouselabs.ca"</li> -->
+    <!-- <li>"9sm5xK": "http://www.google.com"</li> -->
+    <!-- <li>third item</li> -->
+  </ul>
+</body>
+</html>
