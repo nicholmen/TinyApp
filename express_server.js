@@ -56,6 +56,7 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+//We will use the urls_new.ejs template to render the endpoint, /urls/new.
 app.post("/urls", (req, res) => {
   console.log(req.body);  // debug statement to see POST parameters
   // generate randomstring
@@ -70,10 +71,30 @@ app.post("/urls", (req, res) => {
 });
 
 // // In your Express server, add the following route to handle shortURL requests:
-
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
+});
+
+//Add a POST route that removes a URL resource: POST /urls/:id/delete
+//(may need Javascript's delete operator to remove the URL)
+app.post('/urls/:shortURL/delete', (req, res) => {
+
+  let shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+//After the resource has been deleted, redirect the client back to the urls_index page ("/urls").
+  res.redirect('/urls')
+});
+
+
+app.post('/urls/:shortURL/', (req, res) => {
+
+  let shortURL = req.params.shortURL;
+  let updatedLongURL = req.body.updatedLongURL;
+  //console.log(updatedLongURL);
+  //update this new value in the existing database
+  urlDatabase[shortURL] = updatedLongURL;
+  res.redirect('/urls')
 });
 
 // console.log(randomstring.generate(7))
