@@ -1,4 +1,4 @@
-var express = require("express");
+const express = require('express');
 var app = express();
 var PORT = process.env.PORT || 8080; // default port 8080
 
@@ -6,12 +6,20 @@ var PORT = process.env.PORT || 8080; // default port 8080
 //which we will store in a variable called urlDatabase
 const randomstring = require("randomstring");
 const bodyParser = require("body-parser");
+var cookieParser = require('cookie-parser');
+
 
 function generateRandomString() {
   return (randomstring.generate(6))
 }
 
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
+// YOUR FIRST MIDDLEWARE WITH SY :)
+app.use((req, res, next) => {
+  res.locals.username = req.cookies.username;
+  next();
+});
 
 app.set("view engine", "ejs");
 
@@ -41,6 +49,7 @@ app.listen(PORT, () => {
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   console.log(templateVars)
+  console.log('Cookies: ', req.cookies.username)
   res.render("urls_index", templateVars);
 });
 
@@ -96,6 +105,27 @@ app.post('/urls/:shortURL/', (req, res) => {
   urlDatabase[shortURL] = updatedLongURL;
   res.redirect('/urls')
 });
+
+// In order to handle the form submission, add an endpoint to handle a POST to /login
+app.post('/login', (req, res) => {
+  // Use the endpoint to set the cookie parameter called username to the value submitted
+  // in the //request body via the form.
+  let username = req.body.username;
+  console.log('Post username body', username);
+  // console.log('Cookies: ', req.cookies.username)
+  // As a reminder, in order to set a cookie, we can use res.cookie, as provided by Express.
+  // You don't need to provide the (optional) options for now.
+  res.cookie('username', username)
+ // After your server has set the cookie it should redirect the browser back to the /urls page.
+  res.redirect('/urls')
+  // We still have to display the username back to the user in order to indicate that they have
+  // successfully logged in. But we can test that this endpoint is working correctly without that.
+});
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls')
+})
 
 // console.log(randomstring.generate(7))
 

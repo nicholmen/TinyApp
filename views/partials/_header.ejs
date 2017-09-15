@@ -1,10 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>TinyApp</title>
-</head>
-<body>
-
+<header>
   <h1> TinyApp </h1>
-</body>
-</html>
+<!-- In the _header.ejs partial of your app, create a <form> that POSTs to /login.
+The form should contain:
+a single text input with name="username"
+a submit button to submit the form
+Users will type in any username into this form in order to "sign in" for now. -->
+    <% if (username) { %>
+      <h2> Hello there, <%= username %> !!!!! </h2>
+      <form action='/logout' method='POST'>
+        <button type='submit'>logout</button>
+      </form>
+    <% } else { %>
+      <form action='/login' method='POST'>
+      <p>
+        <label for='username'>username</label>
+        <input type='username' name='username'/>
+      </p>
+      <button type='submit'>log in</button>
+      </form>
+    <% } %>
+</header>
