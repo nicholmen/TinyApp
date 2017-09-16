@@ -15,7 +15,7 @@ function generateRandomString() {
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
-// YOUR FIRST MIDDLEWARE WITH SY :)
+// middleware to make username globally available
 app.use((req, res, next) => {
   res.locals.username = req.cookies.username;
   next();
@@ -45,7 +45,8 @@ app.listen(PORT, () => {
 });
 
 
-// add a new route handler for "/urls" and use res.render() to pass the URL data to your template.
+// add a new route handler for "/urls" and use res.render() to pass the URL data to
+//your template.
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   console.log(templateVars)
@@ -73,9 +74,6 @@ app.post("/urls", (req, res) => {
   let randomURL = generateRandomString();
   urlDatabase[randomURL] = longURL;
   // ^^ add req.body.longURL to urlDatabase with key randomstring
-
-
-  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
   res.redirect(`/urls/${randomURL}`)
 });
 
@@ -88,7 +86,6 @@ app.get("/u/:shortURL", (req, res) => {
 //Add a POST route that removes a URL resource: POST /urls/:id/delete
 //(may need Javascript's delete operator to remove the URL)
 app.post('/urls/:shortURL/delete', (req, res) => {
-
   let shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
 //After the resource has been deleted, redirect the client back to the urls_index page ("/urls").
@@ -124,6 +121,13 @@ app.post('/login', (req, res) => {
 
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
+  res.redirect('/urls')
+})
+
+//Create a GET /register endpoint, which returns a page that includes a form with an
+//email and password field.
+// GET method route
+app.get('/register', function (req, res) {
   res.redirect('/urls')
 })
 

@@ -1,0 +1,24 @@
+<!-- a page that includes a form with an email and password field.
+The email field should use type=email and have name=email. The password field should use type=password and have name=password. -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>TinyApp</title>
+</head>
+<body>
+  <%- include partials/_header %>
+  <h1>Please register</h1>
+  <p>
+    <form action='/register' method='POST'>
+      <label for='email'>Email</label>
+      <input type="email" placeholder="Enter Email" name="email"/>
+      <label for='password'>Password</label>
+      <input type="password" placeholder="Enter Password" name="password" />
+      <button>Register</button>
+    </form>
+  </p>
+</body>
+</html>
