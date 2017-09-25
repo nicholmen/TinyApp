@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const express = require('express');
 var app = express();
 var PORT = process.env.PORT || 8080; // default port 8080
@@ -26,15 +27,14 @@ const users = {
   "userRandomID": {
     user_id: "userRandomID",
     email: "user@example.com",
-    password: "a"
+    password: bcrypt.hashSync("a", 10)
   },
  "user2RandomID": {
     user_id: "user2RandomID",
     email: "user2@example.com",
-    password: "a"
+    password: bcrypt.hashSync("a", 10)
   }
 }
-
 
 function generateRandomString() {
   return (randomstring.generate(6))
@@ -124,7 +124,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   let user = res.locals.user;
   const url = urlDatabase[shortURL];
 
-  // check to make sure current user_id is the same as url id 
+  // check to make sure current user_id is the same as url id
   if (user.user_id === url.user_id) {
     delete urlDatabase[shortURL];
   }
@@ -152,7 +152,7 @@ app.post('/login', (req, res) => {
 
   for (let user in users) {
     // if email is in use then res a 400 error
-    if (users[user].email === email && users[user].password === password) {
+    if (users[user].email === email && bcrypt.compareSync(password, users[user].password)) {
       // console.log('Cookies: ', req.cookies.username)
       // As a reminder, in order to set a cookie, we can use res.cookie, as provided by Express.
       // You don't need to provide the (optional) options for now.
@@ -176,7 +176,7 @@ app.post('/logout', (req, res) => {
 //email and password field.
 // GET method route
 app.get('/register', function (req, res) {
-  res.render('registration')
+  res.render('registration');
 })
 
 // Create a POST /register endpoint, and implement it such that it adds a new user object in
@@ -185,6 +185,7 @@ app.get('/register', function (req, res) {
 app.post('/register', function (req, res) {
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   // check to make sure email and password fields are populated
   if (!email || !password) {
@@ -200,7 +201,7 @@ app.post('/register', function (req, res) {
   let newUser = {
     user_id: generateRandomString(),
     email,
-    password
+    password: hashedPassword
   }
 
   users[newUser.user_id] = newUser;
