@@ -14,7 +14,7 @@ A link for shortening a new URL (this will be a dead link for now, that is it do
     <!-- Add your EJS code here -->
   <ul>
     <% for (var shortCode in urls) { %>
-      <% if (user.user_id === urls[shortCode].user_id) { %>
+      <% if (user && (user.user_id === urls[shortCode].user_id)) { %>
         <li>
           <%= urls[shortCode].url %> -
           <%= shortCode %>
