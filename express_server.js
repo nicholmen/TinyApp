@@ -9,9 +9,17 @@ const bodyParser = require("body-parser");
 var cookieParser = require('cookie-parser');
 
 var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
+  "b2xVn2": {
+    "url": "http://www.lighthouselabs.ca",
+    "user_id": "userRandomID"
+  },
+  "9sm5xK": {
+    "url": "http://www.google.com",
+    "user_id": "user2RandomID"
+  },
+}
+
+  // "9sm5xK": "http://www.google.com"
 
 // app.use((req, res, next) => {
 const users = {
@@ -38,12 +46,12 @@ app.use(cookieParser());
 app.use((req, res, next) => {
   // set user_id in cookie to a variable
   const user_id = req.cookies.user_id;
-
-  if (!user_id) {
-    res.locals.user = undefined;
-  } else {
-    res.locals.user = users[user_id];
-  }
+  res.locals.user = users[user_id];
+  // if (!user_id) {
+  //   res.locals.user = undefined;
+  // } else {
+  //   res.locals.user = users[user_id];
+  // }
   // set user variable to user object in global users
   // with the user_id provided in cookie
   next();
@@ -91,10 +99,14 @@ app.get("/urls/:id", (req, res) => {
 //We will use the urls_new.ejs template to render the endpoint, /urls/new.
 app.post("/urls", (req, res) => {
   // console.log(req.body);  // debug statement to see POST parameters
-  // generate randomstring
+  let user = res.locals.user;
   let longURL = req.body.longURL;
+  // generate randomstring
   let randomURL = generateRandomString();
-  urlDatabase[randomURL] = longURL;
+  urlDatabase[randomURL] = {
+    url: longURL,
+    user_id: user.user_id
+  }
   // ^^ add req.body.longURL to urlDatabase with key randomstring
   res.redirect(`/urls/${randomURL}`)
 });
@@ -109,7 +121,14 @@ app.get("/u/:shortURL", (req, res) => {
 //(may need Javascript's delete operator to remove the URL)
 app.post('/urls/:shortURL/delete', (req, res) => {
   let shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
+  let user = res.locals.user;
+  const url = urlDatabase[shortURL];
+
+  // check to make sure current user_id is the same as url id 
+  if (user.user_id === url.user_id) {
+    delete urlDatabase[shortURL];
+  }
+
 //After the resource has been deleted, redirect the client back to the urls_index page ("/urls").
   res.redirect('/urls')
 });
@@ -119,7 +138,6 @@ app.post('/urls/:shortURL/', (req, res) => {
 
   let shortURL = req.params.shortURL;
   let updatedLongURL = req.body.updatedLongURL;
-  //console.log(updatedLongURL);
   //update this new value in the existing database
   urlDatabase[shortURL] = updatedLongURL;
   res.redirect('/urls')

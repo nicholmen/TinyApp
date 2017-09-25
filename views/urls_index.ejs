@@ -14,14 +14,17 @@ A link for shortening a new URL (this will be a dead link for now, that is it do
     <!-- Add your EJS code here -->
   <ul>
     <% for (var shortCode in urls) { %>
-      <li>
-        <%= urls[shortCode] %> -
-        <%= shortCode %>
-      </li>
-      <a href="/urls/<%= shortCode %>">edit</a>
-      <form action="/urls/<%= shortCode %>/delete" method="POST">
-      <button type="submit">Delete</button> </form>
-
+      <% if (user.user_id === urls[shortCode].user_id) { %>
+        <li>
+          <%= urls[shortCode].url %> -
+          <%= shortCode %>
+          <%= urls[shortCode].user_id %>
+        </li>
+          <a href="/urls/<%= shortCode %>">edit</a>
+          <form action="/urls/<%= shortCode %>/delete" method="POST">
+            <button type="submit">Delete</button>
+          </form>
+      <% } %>
     <% } %>
     <!-- <li>"b2xVn2": "http://www.lighthouselabs.ca"</li> -->
     <!-- <li>"9sm5xK": "http://www.google.com"</li> -->
