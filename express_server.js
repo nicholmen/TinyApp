@@ -8,6 +8,25 @@ const randomstring = require("randomstring");
 const bodyParser = require("body-parser");
 var cookieParser = require('cookie-parser');
 
+var urlDatabase = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+};
+
+// app.use((req, res, next) => {
+const users = {
+  "userRandomID": {
+    user_id: "userRandomID",
+    email: "user@example.com",
+    password: "a"
+  },
+ "user2RandomID": {
+    user_id: "user2RandomID",
+    email: "user2@example.com",
+    password: "a"
+  }
+}
+
 
 function generateRandomString() {
   return (randomstring.generate(6))
@@ -15,18 +34,23 @@ function generateRandomString() {
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
-// YOUR FIRST MIDDLEWARE WITH SY :)
+// middleware to make username globally available
 app.use((req, res, next) => {
-  res.locals.username = req.cookies.username;
+  // set user_id in cookie to a variable
+  const user_id = req.cookies.user_id;
+
+  if (!user_id) {
+    res.locals.user = undefined;
+  } else {
+    res.locals.user = users[user_id];
+  }
+  // set user variable to user object in global users
+  // with the user_id provided in cookie
   next();
 });
 
 app.set("view engine", "ejs");
 
-var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
 
 app.get("/", (req, res) => {
   res.end("Hello!");
@@ -45,11 +69,10 @@ app.listen(PORT, () => {
 });
 
 
-// add a new route handler for "/urls" and use res.render() to pass the URL data to your template.
+// add a new route handler for "/urls" and use res.render() to pass the URL data to
+//your template.
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
-  console.log(templateVars)
-  console.log('Cookies: ', req.cookies.username)
   res.render("urls_index", templateVars);
 });
 
@@ -67,15 +90,12 @@ app.get("/urls/:id", (req, res) => {
 
 //We will use the urls_new.ejs template to render the endpoint, /urls/new.
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // debug statement to see POST parameters
+  // console.log(req.body);  // debug statement to see POST parameters
   // generate randomstring
   let longURL = req.body.longURL;
   let randomURL = generateRandomString();
   urlDatabase[randomURL] = longURL;
   // ^^ add req.body.longURL to urlDatabase with key randomstring
-
-
-  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
   res.redirect(`/urls/${randomURL}`)
 });
 
@@ -88,7 +108,6 @@ app.get("/u/:shortURL", (req, res) => {
 //Add a POST route that removes a URL resource: POST /urls/:id/delete
 //(may need Javascript's delete operator to remove the URL)
 app.post('/urls/:shortURL/delete', (req, res) => {
-
   let shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
 //After the resource has been deleted, redirect the client back to the urls_index page ("/urls").
@@ -110,24 +129,80 @@ app.post('/urls/:shortURL/', (req, res) => {
 app.post('/login', (req, res) => {
   // Use the endpoint to set the cookie parameter called username to the value submitted
   // in the //request body via the form.
-  let username = req.body.username;
-  console.log('Post username body', username);
-  // console.log('Cookies: ', req.cookies.username)
-  // As a reminder, in order to set a cookie, we can use res.cookie, as provided by Express.
-  // You don't need to provide the (optional) options for now.
-  res.cookie('username', username)
- // After your server has set the cookie it should redirect the browser back to the /urls page.
-  res.redirect('/urls')
-  // We still have to display the username back to the user in order to indicate that they have
-  // successfully logged in. But we can test that this endpoint is working correctly without that.
+  let email = req.body.email;
+  let password = req.body.password;
+
+  for (let user in users) {
+    // if email is in use then res a 400 error
+    if (users[user].email === email && users[user].password === password) {
+      // console.log('Cookies: ', req.cookies.username)
+      // As a reminder, in order to set a cookie, we can use res.cookie, as provided by Express.
+      // You don't need to provide the (optional) options for now.
+      res.cookie('user_id', users[user].user_id);
+     // After your server has set the cookie it should redirect the browser back to the /urls page.
+      res.redirect('/urls')
+      return
+      // We still have to display the username back to the user in order to indicate that they have
+      // successfully logged in. But we can test that this endpoint is working correctly without that.
+    };
+  };
+  res.status(403).send("user doesn't exist or password is wrong")
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls')
 })
 
+//Create a GET /register endpoint, which returns a page that includes a form with an
+//email and password field.
+// GET method route
+app.get('/register', function (req, res) {
+  res.render('registration')
+})
+
+// Create a POST /register endpoint, and implement it such that it adds a new user object in
+// the global users object which keeps track of the newly registered user's email, password and
+// user ID.
+app.post('/register', function (req, res) {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  // check to make sure email and password fields are populated
+  if (!email || !password) {
+    res.status(400).send('Password or email missing.');
+  }
+
+  // loop through all users and check if email is already in use
+  for (let user in users) {
+    // if email is in use then res a 400 error
+    if (users[user].email === email) res.status(400).send('Email already in use.');
+  }
+
+  let newUser = {
+    user_id: generateRandomString(),
+    email,
+    password
+  }
+
+  users[newUser.user_id] = newUser;
+  res.cookie('user_id', newUser.user_id);
+  res.redirect('/urls')
+});
+
+//lecture code
+// app.post('/login', (req, res) => {
+//   console.log('Post login body', req.body);
+//   const foundUser = authenticateUser(req.body.email, req.body.password);
+//   if (foundUser !== undefined) {
+//     // res.cookie('userId', foundUser.id);
+//     req.session.user = foundUser;
+//     res.redirect('/');
+//   } else {
+//     res.status(403);
+//     res.render('login', { error: 'Not Found' });
+//   }
+// });
 // console.log(randomstring.generate(7))
 
  // urlDatabase['cats'] = "meow"
-
