@@ -7,11 +7,12 @@
   <%- include partials/_header %>
 
   <!-- <p> "b2xVn2": "http://www.lighthouselabs.ca" </p> -->
-  <p> ShortURL: <%= shortURL %> ⇨ <%= longURL %>  </p>
+  <p> ShortURL: <%= shortURL %> ⇨ <%= longURL.url %>  </p>
   <form action="/urls/<%= shortURL %>" method="POST">
       <!-- text input below  -->
-      <input type="text" name="updatedLongURL">
-
-      <button type="submit">Update</button> </form>
+      <input type="text" name="updatedLongURL" value="<%= longURL.url %>">
+      <button type="submit">Update</button>
+  </form>
+  <a href="/urls">Go back to my URLs</a>
 </body>
 </html>

@@ -10,25 +10,41 @@ A link for shortening a new URL (this will be a dead link for now, that is it do
 <body>
 
     <%- include partials/_header %>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Long Url</th>
+                <th>Short Url</th>
+                <th>User</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        <% for (var shortCode in urls) { %>
+        <tr>
+            <td><%= urls[shortCode].url %></td>
+            <td><%= shortCode %></td>
+            <td><%= urls[shortCode].user_id %></td>
+            <td>
+            <% if (user && (user.user_id === urls[shortCode].user_id)) { %>
 
+            <form action="/urls/<%= shortCode %>/delete" method="POST">
+                <a href="/urls/<%= shortCode %>" class="btn btn-default">edit</a>
+                <button type="submit" class="btn btn-default">Delete</button>
+            </form>
+            <% } %>
+            </td>
+        </tr>
+        <% } %>
+        </tbody>
+    </table>
     <!-- Add your EJS code here -->
   <ul>
-    <% for (var shortCode in urls) { %>
-      <% if (user && (user.user_id === urls[shortCode].user_id)) { %>
-        <li>
-          <%= urls[shortCode].url %> -
-          <%= shortCode %>
-          <%= urls[shortCode].user_id %>
-        </li>
-          <a href="/urls/<%= shortCode %>">edit</a>
-          <form action="/urls/<%= shortCode %>/delete" method="POST">
-            <button type="submit">Delete</button>
-          </form>
-      <% } %>
-    <% } %>
+
     <!-- <li>"b2xVn2": "http://www.lighthouselabs.ca"</li> -->
     <!-- <li>"9sm5xK": "http://www.google.com"</li> -->
     <!-- <li>third item</li> -->
   </ul>
+<a href="/urls/new">Create a new URL</a>
 </body>
 </html>
